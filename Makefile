@@ -9,7 +9,7 @@ OUTPUT_PACKAGE=Carthage.pkg
 CARTHAGE_EXECUTABLE=./.build/release/carthage
 BINARIES_FOLDER=$(PREFIX)/bin
 
-SWIFT_BUILD_FLAGS=--configuration release -Xswiftc -suppress-warnings
+SWIFT_BUILD_FLAGS=--configuration release -Xswiftc -suppress-warnings -v
 
 SWIFTPM_DISABLE_SANDBOX_SHOULD_BE_FLAGGED:=$(shell test -n "$${HOMEBREW_SDKROOT}" && echo should_be_flagged)
 ifeq ($(SWIFTPM_DISABLE_SANDBOX_SHOULD_BE_FLAGGED), should_be_flagged)
@@ -58,7 +58,7 @@ installables:
 package: installables
 	$(MKDIR) "$(CARTHAGE_TEMPORARY_FOLDER)$(BINARIES_FOLDER)"
 	$(CP) "$(CARTHAGE_EXECUTABLE)" "$(CARTHAGE_TEMPORARY_FOLDER)$(BINARIES_FOLDER)"
-	
+
 	pkgbuild \
 		--identifier "org.carthage.carthage" \
 		--install-location "/" \
@@ -81,6 +81,6 @@ install: installables
 
 uninstall:
 	$(RM) "$(BINARIES_FOLDER)/carthage"
-	
+
 xcodeproj:
 	 swift package generate-xcodeproj

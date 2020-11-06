@@ -179,7 +179,13 @@ internal func checkFrameworkCompatibility(_ frameworkURL: URL, usingToolchain to
 /// Creates a task description for executing `xcodebuild` with the given
 /// arguments.
 public func xcodebuildTask(_ tasks: [String], _ buildArguments: BuildArguments, environment: [String: String]? = nil) -> Task {
-	return Task("/usr/bin/xcrun", arguments: buildArguments.arguments + tasks, environment: environment)
+	var arguments =  buildArguments.arguments + tasks
+	let isSimulator =  buildArguments.arguments.filter ({ $0.contains("iphonesimulator")}).count > 0
+	if isSimulator {
+		arguments.append("EXCLUDED_ARCHS=arm64")
+	}
+	debugPrint("\(arguments)")
+	return Task("/usr/bin/xcrun", arguments: arguments, environment: environment)
 }
 
 /// Creates a task description for executing `xcodebuild` with the given
@@ -1369,9 +1375,9 @@ private func UUIDsFromDwarfdump(_ url: URL) -> SignalProducer<Set<UUID>, Carthag
 		.ignoreTaskData()
 		.mapError(CarthageError.taskError)
 		.map { String(data: $0, encoding: .utf8) ?? "" }
-		// If there are no dSYMs (the output is empty but has a zero exit 
+		// If there are no dSYMs (the output is empty but has a zero exit
 		// status), complete with no values. This can occur if this is a "fake"
-		// framework, meaning a static framework packaged like a dynamic 
+		// framework, meaning a static framework packaged like a dynamic
 		// framework.
 		.filter { !$0.isEmpty }
 		.flatMap(.merge) { output -> SignalProducer<Set<UUID>, CarthageError> in

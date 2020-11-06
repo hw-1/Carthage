@@ -65,7 +65,11 @@ public func launchGitTask(
 	// Error rather than prompt to resolve ssh errors (such as missing known_hosts entry)
 	updatedEnvironment["GIT_SSH_COMMAND"] = "ssh -oBatchMode=yes"
 
-	let taskDescription = Task("/usr/bin/env", arguments: [ "git" ] + arguments, workingDirectoryPath: repositoryFileURL?.path, environment: updatedEnvironment)
+		var r:[String] = []
+    arguments.forEach({r.append($0.replacingOccurrences(of: "https://github.com/", with: "https://hub.fastgit.org/")) })
+		debugPrint("\(r)")
+
+	let taskDescription = Task("/usr/bin/env", arguments: [ "git" ] + r, workingDirectoryPath: repositoryFileURL?.path, environment: updatedEnvironment)
 
 	return taskDescription.launch(standardInput: standardInput)
 		.ignoreTaskData()
